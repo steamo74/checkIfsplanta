@@ -84,8 +84,17 @@ const CHECK=[
 "No se encuentran productos químicos fuera, sin supervisión."
 ]}];
 const state={answers:{},photos:{},temps:{},returnLocations:[],returnPhoto:null};
-const APP_VERSION="2026-10-05-03";const $=x=>document.getElementById(x);
-async function autoRefresh(){try{const u=location.href.split("#")[0]+"?v="+APP_VERSION+"_"+Date.now();const r=await fetch(u,{cache:"no-store",headers:{"Cache-Control":"no-cache"}});const t=await r.text();if(t.includes(APP_VERSION)){sessionStorage.setItem("checkifs_version",APP_VERSION);}}catch(e){}}
+const APP_VERSION="2026-10-05-03";const APP_VERSION="2026-10-05-04";const $=x=>document.getElementById(x);
+(function(){
+  try{
+    const isStandalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone;
+    if(isStandalone && "serviceWorker" in navigator){
+      navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});
+      if("caches" in window)caches.keys().then(keys=>keys.forEach(k=>caches.delete(k))).catch(()=>{});
+    }
+  }catch(e){}
+})();
+
 
 function init(){const now=new Date();$("date").value=now.toLocaleDateString("es-ES");$("time").value=now.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"});loadConfig();render();update()}
 function loadConfig(){let p=JSON.parse(localStorage.getItem("ifs_people")||"null")||["Alex","Miguel","Stefano"];let e=JSON.parse(localStorage.getItem("ifs_emails")||"null")||["calidad@empresa.com","trafico@empresa.com","direccion@empresa.com"];$("people").value=p.join("\n");$("emails").value=e.join("\n");fillPeople(p)}
