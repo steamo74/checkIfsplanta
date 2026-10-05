@@ -101,7 +101,7 @@ const CHECK=[
 "No se encuentran productos químicos fuera, sin supervisión."
 ]}];
 const state={answers:{},photos:{},temps:{},returnLocations:[],returnPhoto:null,returnC1Photo:[],returnC4Photo:[],hooksCountedPhoto:[],hooksMissingPhoto:[],adblueLevel:""};
-const APP_VERSION="2026-10-05-13";const $=x=>document.getElementById(x);
+const APP_VERSION="2026-10-05-14";const $=x=>document.getElementById(x);
 (function(){
   try{
     const isStandalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone;
@@ -138,134 +138,66 @@ function validate(){let errors=[];if(!$("responsible").value)errors.push("Selecc
 async function makePdf(){
  const {jsPDF}=window.jspdf;
  const doc=new jsPDF({orientation:"p",unit:"mm",format:"a4"});
- const M=12,W=186,B=278,LINE=4.2;
- let y=18;
- const safe=v=>String(v==null||v===""?"—":v);
- const escPdf=v=>safe(v).replace(/[\\u0000-\\u001F]/g," ");
- function page(){doc.addPage();y=18;drawHeader();}
- function drawHeader(){
-   doc.setFillColor(11,110,79);doc.rect(0,0,210,10,"F");
-   doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(7.5);
-   doc.text("CHECK IFS PLANTA · MERCAZARAGOZA",M,6.5);
-   doc.setTextColor(23,50,42);
- }
- function footer(){
-   const n=doc.getNumberOfPages();
-   for(let p=1;p<=n;p++){doc.setPage(p);doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(90,105,99);doc.text("CheckIFS Planta · Mercazaragoza",M,289);doc.text("Página "+p+" de "+n,198,289,{align:"right"});}
- }
- function section(title){
-   if(y> B-12) page();
-   y+=2;doc.setFillColor(235,243,239);doc.rect(M,y-5,W,8,"F");
-   doc.setDrawColor(160,180,171);doc.rect(M,y-5,W,8);
-   doc.setTextColor(23,50,42);doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.text(title,M+3,y);y+=9;
- }
- function cellText(v,w,bold=false,size=7.5){
-   doc.setFont("helvetica",bold?"bold":"normal");doc.setFontSize(size);
-   return doc.splitTextToSize(escPdf(v),Math.max(5,w-4));
- }
- function table(headers,rows,widths){
-   const headH=9;
-   const drawHeader=()=>{
-     let x=M;doc.setFillColor(235,235,235);doc.setDrawColor(90,90,90);doc.setLineWidth(.25);
-     headers.forEach((h,i)=>{doc.rect(x,y,widths[i],headH);doc.setFont("helvetica","bold");doc.setFontSize(7);doc.setTextColor(20,20,20);doc.text(cellText(h,widths[i],true,7),x+2,y+5.8);x+=widths[i]});
-     y+=headH;
-   };
-   if(y+headH>B) page();
-   drawHeader();
+ const M=12,W=186,B=278;let y=18;
+ const clean=v=>String(v==null||v===""?"—":v).replace(/[\\u0000-\\u001F]/g," ");
+ function newPage(){doc.addPage();y=18;topBar()}
+ function topBar(){doc.setFillColor(11,110,79);doc.rect(0,0,210,9,"F");doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(7);doc.text("CHECK IFS PLANTA · MERCAZARAGOZA",M,6);doc.setTextColor(20,40,35)}
+ function section(t){if(y>B-12)newPage();y+=2;doc.setFillColor(235,243,239);doc.setDrawColor(130,150,142);doc.rect(M,y-5,W,8,"FD");doc.setFont("helvetica","bold");doc.setFontSize(9.2);doc.text(t,M+3,y);y+=9}
+ function lines(txt,w,size=7.2){doc.setFont("helvetica","normal");doc.setFontSize(size);return doc.splitTextToSize(clean(txt),Math.max(5,w-4))}
+ function grid(headers,rows,widths){
+   const hh=8;
+   function head(){let x=M;headers.forEach((h,i)=>{doc.setFillColor(232,232,232);doc.setDrawColor(80,80,80);doc.rect(x,y,widths[i],hh,"FD");doc.setFont("helvetica","bold");doc.setFontSize(7);doc.text(lines(h,widths[i],7),x+2,y+5);x+=widths[i]});y+=hh}
+   if(y+hh>B)newPage();head();
    rows.forEach(row=>{
-     const lines=row.map((v,i)=>cellText(v,widths[i],false,7.2));
-     const h=Math.max(7, ...lines.map(a=>a.length*3.5+4));
-     if(y+h>B){page();drawHeader();}
+     const ls=row.map((v,i)=>lines(v,widths[i]));
+     const rh=Math.max(7,...ls.map(a=>a.length*3.5+4));
+     if(y+rh>B){newPage();head();}
      let x=M;
-     lines.forEach((ls,i)=>{doc.setDrawColor(100,100,100);doc.rect(x,y,widths[i],h);doc.setFont("helvetica","normal");doc.setFontSize(7.2);doc.setTextColor(20,20,20);doc.text(ls,x+2,y+4.5,{lineHeightFactor:1});x+=widths[i]});
-     y+=h;
-   });
-   y+=3;
+     ls.forEach((a,i)=>{doc.setDrawColor(90,90,90);doc.rect(x,y,widths[i],rh);doc.setFont("helvetica","normal");doc.setFontSize(7.2);doc.text(a,x+2,y+4.5);x+=widths[i]});
+     y+=rh;
+   });y+=3;
  }
- async function photoGrid(title,arr){
-   if(!arr||!arr.length)return;
-   section(title);
-   const pw=88,ph=58,g=10;
-   for(let i=0;i<arr.length;i+=2){
-     if(y+ph+12>B)page();
-     for(let j=0;j<2&&i+j<arr.length;j++){
-       const x=M+j*(pw+g);
-       try{doc.addImage(arr[i+j],"JPEG",x,y,pw,ph);doc.setDrawColor(100,100,100);doc.rect(x,y,pw,ph);doc.setFont("helvetica","normal");doc.setFontSize(7);doc.text("Foto "+(i+j+1),x,y+ph+4)}catch(e){}
-     }
-     y+=ph+9;
-   }
-   y+=2;
+ async function photos(title,arr){
+   if(!arr||!arr.length)return;section(title);
+   const pw=88,ph=56,g=10;
+   for(let i=0;i<arr.length;i+=2){if(y+ph+9>B)newPage();for(let j=0;j<2&&i+j<arr.length;j++){const x=M+j*(pw+g);try{doc.addImage(arr[i+j],"JPEG",x,y,pw,ph);doc.setDrawColor(90,90,90);doc.rect(x,y,pw,ph);doc.setFont("helvetica","normal");doc.setFontSize(7);doc.text("Foto "+(i+j+1),x,y+ph+4)}catch(e){}}y+=ph+9}y+=2;
  }
- drawHeader();
- doc.setFont("helvetica","bold");doc.setFontSize(15);doc.setTextColor(23,50,42);doc.text("CHECK IFS PLANTA",M,18);y=24;
- doc.setFont("helvetica","normal");doc.setFontSize(8);doc.text("REG0500c-VER-ZPC · Inspección de planta · Mercazaragoza",M,y);y+=7;
+ topBar();doc.setFont("helvetica","bold");doc.setFontSize(15);doc.setTextColor(20,55,45);doc.text("CHECK IFS PLANTA",M,18);y=24;doc.setFont("helvetica","normal");doc.setFontSize(8);doc.text("REG0500c-VER-ZPC · Informe de inspección · Mercazaragoza",M,y);y+=7;
  section("1. DATOS DE LA INSPECCIÓN");
- table(["Campo","Valor","Campo","Valor"],[
-   ["Fecha",$(\"date\").value,"Hora",$(\"time\").value],
-   ["Planta","Mercazaragoza","Responsable",$(\"responsible\").value]
- ],[27,66,27,66]);
- section("2. RESULTADO DEL CHECKLIST");
- const ok=Object.values(state.answers).filter(x=>x.status==="ok").length;
- const bad=Object.values(state.answers).filter(x=>x.status==="bad").length;
- const total=CHECK.reduce((a,s)=>a+s.items.length,0);
- table(["Total","Correctos","Incidencias","Resultado"],[[total,ok,bad,bad?"REVISAR INCIDENCIAS":"CONFORME"],],[32,32,32,90]);
- CHECK.forEach((sec,si)=>{
-   section((si+3)+". "+sec.title.toUpperCase());
-   const rows=sec.items.map((txt,i)=>{
-     const a=state.answers[si+"-"+i]||{};
-     return [i+1,txt,a.status==="ok"?"OK":a.status==="bad"?"NO OK":"—",a.critical||"",a.status==="bad"?(a.obs||""):""];
-   });
-   table(["Nº","Punto de control","Resultado","Criticidad","Observación"],rows,[9,91,21,24,41]);
-   sec.items.forEach((txt,i)=>{
-     const k=si+"-"+i,a=state.answers[k]||{};
-     if(a.status==="bad"&&state.photos[k]?.length)photoGrid("Fotos · "+txt,state.photos[k]);
-   });
- });
+ grid(["Campo","Valor","Campo","Valor"],[["Fecha",$(\"date\").value,"Hora",$(\"time\").value],["Planta","Mercazaragoza","Responsable",$(\"responsible\").value]],[27,66,27,66]);
+ section("2. RESUMEN DEL CHECKLIST");
+ const ok=Object.values(state.answers).filter(x=>x.status==="ok").length,bad=Object.values(state.answers).filter(x=>x.status==="bad").length,total=CHECK.reduce((a,s)=>a+s.items.length,0);
+ grid(["Total puntos","OK","NO OK","Pendientes"],[[total,ok,bad,total-ok-bad]],[46.5,46.5,46.5,46.5]);
+ section("3. CHECKLIST COMPLETO · MUELLES Y ZONA DE RECEPCIÓN / EXPEDICIÓN");
+ let rows=[];
+ CHECK[0].items.forEach((txt,i)=>{const a=state.answers["0-"+i]||{};rows.push([i+1,txt,a.status==="ok"?"OK":a.status==="bad"?"NO OK":"PENDIENTE",a.critical||"",a.status==="bad"?(a.obs||""):""]);});
+ grid(["Nº","Punto de control","Resultado","Criticidad","Observación"],rows,[9,91,21,24,41]);
+ for(let i=0;i<CHECK[0].items.length;i++){const k="0-"+i;if(state.answers[k]?.status==="bad")await photos("Fotos · Punto "+(i+1),state.photos[k])}
+ section("4. CHECKLIST COMPLETO · CÁMARAS DE REFRIGERACIÓN Y CONGELACIÓN");
+ rows=[];CHECK[1].items.forEach((txt,i)=>{const a=state.answers["1-"+i]||{};rows.push([i+1,txt,a.status==="ok"?"OK":a.status==="bad"?"NO OK":"PENDIENTE",a.critical||"",a.status==="bad"?(a.obs||""):""]);});
+ grid(["Nº","Punto de control","Resultado","Criticidad","Observación"],rows,[9,91,21,24,41]);
+ for(let i=0;i<CHECK[1].items.length;i++){const k="1-"+i;if(state.answers[k]?.status==="bad")await photos("Fotos · Punto "+(i+1),state.photos[k])}
+ section("5. CHECKLIST COMPLETO · ZONA DE MATERIAL AUXILIAR");
+ rows=[];CHECK[2].items.forEach((txt,i)=>{const a=state.answers["2-"+i]||{};rows.push([i+1,txt,a.status==="ok"?"OK":a.status==="bad"?"NO OK":"PENDIENTE",a.critical||"",a.status==="bad"?(a.obs||""):""]);});
+ grid(["Nº","Punto de control","Resultado","Criticidad","Observación"],rows,[9,91,21,24,41]);
+ for(let i=0;i<CHECK[2].items.length;i++){const k="2-"+i;if(state.answers[k]?.status==="bad")await photos("Fotos · Punto "+(i+1),state.photos[k])}
  section("6. TEMPERATURAS DE CÁMARAS");
- table(["Cámara","Temperatura","Cámara","Temperatura"],[
-   ["C1","−"+$(\"tC1\").value+" °C","C4",$(\"tC4\").value+" °C"],
-   ["C2","−"+$(\"tC2\").value+" °C","C5",$(\"tC5\").value+" °C"],
-   ["C3","−"+$(\"tC3\").value+" °C","",""]
- ],[28,65,28,65]);
+ grid(["Cámara","Temperatura","Cámara","Temperatura"],[["C1","−"+$(\"tC1\").value+" °C","C4",$(\"tC4\").value+" °C"],["C2","−"+$(\"tC2\").value+" °C","C5",$(\"tC5\").value+" °C"],["C3","−"+$(\"tC3\").value+" °C","",""]],[28,65,28,65]);
  section("7. ZONA DEVOLUCIÓN");
- table(["Zona","¿Hay producto?","¿Está etiquetado?","Fotos"],[
-   ["C1",$(\"returnC1Product\").value,$(\"returnC1Label\").value,(state.returnC1Photo||[]).length],
-   ["C4 · Otros",$(\"returnC4Product\").value,$(\"returnC4Label\").value,(state.returnC4Photo||[]).length]
- ],[40,48,54,44]);
- await photoGrid("Fotos · Devolución C1",state.returnC1Photo);
- await photoGrid("Fotos · Devolución C4 · Otros",state.returnC4Photo);
+ grid(["Zona","¿Hay producto?","¿Está etiquetado?","Fotos"],[["C1",$(\"returnC1Product\").value,$(\"returnC1Label\").value,(state.returnC1Photo||[]).length],["C4 · Otros",$(\"returnC4Product\").value,$(\"returnC4Label\").value,(state.returnC4Photo||[]).length]],[40,48,54,44]);
+ await photos("Fotos · Devolución C1",state.returnC1Photo);await photos("Fotos · Devolución C4 · Otros",state.returnC4Photo);
  section("8. CONTROLES ADICIONALES");
- table(["Control","Valor","Observación"],[
-   ["C4 · Nº palets no almacenaje",$(\"c4palets\").value,""],
-   ["C5 · Nº palets no almacenaje",$(\"c5palets\").value,""],
-   ["C4/C5 · Cliente / observación","",$(\"c45obs\").value]
- ],[70,36,80]);
+ grid(["Control","Valor","Observación"],[["C4 · Nº palets no almacenaje",$(\"c4palets\").value,""],["C5 · Nº palets no almacenaje",$(\"c5palets\").value,""],["C4/C5 · Cliente / observación","",$(\"c45obs\").value]],[70,36,80]);
  section("9. REVISIÓN DE GANCHOS");
- table(["Control","Fotos","Estado"],[
-   ["Ganchos contados",(state.hooksCountedPhoto||[]).length,"Registrado"],
-   ["Ganchos sin contar",(state.hooksMissingPhoto||[]).length,"Registrado"]
- ],[82,34,70]);
- await photoGrid("Fotos · Ganchos contados",state.hooksCountedPhoto);
- await photoGrid("Fotos · Ganchos sin contar",state.hooksMissingPhoto);
+ grid(["Control","Fotos","Estado"],[["Ganchos contados",(state.hooksCountedPhoto||[]).length,"Registrado"],["Ganchos sin contar",(state.hooksMissingPhoto||[]).length,"Registrado"]],[82,34,70]);
+ await photos("Fotos · Ganchos contados",state.hooksCountedPhoto);await photos("Fotos · Ganchos sin contar",state.hooksMissingPhoto);
  section("10. PRODUCTOS DE MANTENIMIENTO Y LIMPIEZA");
- table(["Producto / control","Cantidad","Preparado"],[
-   ["CLORAJET",$(\"clorajetQty\").value,$(\"clorajetPrepared\").value],
-   ["MIDA-FOAM",$(\"midaQty\").value,$(\"midaPrepared\").value]
- ],[90,38,58]);
+ grid(["Producto / control","Cantidad","Preparado"],[["CLORAJET",$(\"clorajetQty\").value,$(\"clorajetPrepared\").value],["MIDA-FOAM",$(\"midaQty\").value,$(\"midaPrepared\").value]],[90,38,58]);
  section("11. REVISIÓN TANQUE ADBLUE");
- table(["25%","50%","75%","100%"],[[
-   state.adblueLevel==="25%"?"✓":"",
-   state.adblueLevel==="50%"?"✓":"",
-   state.adblueLevel==="75%"?"✓":"",
-   state.adblueLevel==="100%"?"✓":""
- ]],[46.5,46.5,46.5,46.5]);
+ grid(["25%","50%","75%","100%"],[[state.adblueLevel==="25%"?"✓":"",state.adblueLevel==="50%"?"✓":"",state.adblueLevel==="75%"?"✓":"",state.adblueLevel==="100%"?"✓":""]],[46.5,46.5,46.5,46.5]);
  section("12. FIRMA DEL RESPONSABLE");
- if(y+48>B)page();
- doc.setDrawColor(100,100,100);doc.rect(M,y,W,42);
- doc.setFont("helvetica","normal");doc.setFontSize(7);doc.text("Firma manuscrita",M+3,y+5);
- try{doc.addImage($(\"signature\").toDataURL("image/png"),"PNG",M+3,y+8,120,30)}catch(e){}
- y+=48;
- footer();
+ if(y+45>B)newPage();doc.setDrawColor(80,80,80);doc.rect(M,y,W,40);doc.setFont("helvetica","normal");doc.setFontSize(7);doc.text("Firma manuscrita del responsable",M+3,y+5);try{doc.addImage($(\"signature\").toDataURL("image/png"),"PNG",M+3,y+8,120,29)}catch(e){}y+=45;
+ const pages=doc.getNumberOfPages();for(let p=1;p<=pages;p++){doc.setPage(p);doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(90,105,99);doc.text("CheckIFS Planta · Mercazaragoza",M,289);doc.text("Página "+p+" de "+pages,198,289,{align:"right"})}
  return doc;
 }
 const sigCanvas=$("signature"),sigCtx=sigCanvas.getContext("2d");let drawing=false,lastX=0,lastY=0;
