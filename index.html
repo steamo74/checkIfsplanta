@@ -23,6 +23,9 @@ canvas#signature{width:100%;height:180px;border:2px dashed #b9ccc5;border-radius
 <section class="card extra">
 <div class="section-title">Controles adicionales</div>
 <div class="grid2">
+<div class="field"><label>Temperatura C1 (°C)</label><div class="temp-input"><span>−</span><input id="tC1" type="number" min="0" step="0.1" inputmode="decimal" placeholder="0"></div></div>
+<div class="field"><label>Temperatura C2 (°C)</label><div class="temp-input"><span>−</span><input id="tC2" type="number" min="0" step="0.1" inputmode="decimal" placeholder="0"></div></div>
+<div class="field"><label>Temperatura C3 (°C)</label><div class="temp-input"><span>−</span><input id="tC3" type="number" min="0" step="0.1" inputmode="decimal" placeholder="0"></div></div>
 <div class="field"><label>C4 · Nº palets (no almacenaje)</label><input id="c4palets" type="number" min="0" inputmode="numeric" placeholder="0"></div>
 <div class="field"><label>C5 · Nº palets (no almacenaje)</label><input id="c5palets" type="number" min="0" inputmode="numeric" placeholder="0"></div>
 <div class="field"><label>Temperatura C4 (°C)</label><input id="tC4" type="number" step="0.1" inputmode="decimal" placeholder="°C"></div>
@@ -84,7 +87,7 @@ const CHECK=[
 "No se encuentran productos químicos fuera, sin supervisión."
 ]}];
 const state={answers:{},photos:{},temps:{},returnLocations:[],returnPhoto:null};
-const APP_VERSION="2026-10-05-03";const APP_VERSION="2026-10-05-04";const $=x=>document.getElementById(x);
+const APP_VERSION="2026-10-05-03";const APP_VERSION="2026-10-05-05";const $=x=>document.getElementById(x);
 (function(){
   try{
     const isStandalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone;
