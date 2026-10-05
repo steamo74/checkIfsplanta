@@ -169,13 +169,23 @@ async function makePdf(){
  }
  function photoGrid(title,photos){
    if(!photos||!photos.length)return;
-   ensure(10);doc.setFont("helvetica","bold");doc.setFontSize(8);doc.text(text(title),M,y);y+=5;
+   ensure(12);
+   doc.setFont("helvetica","bold");doc.setFontSize(8);doc.text(text(title),M,y);y+=5;
    const box=58,gap=5,maxPerRow=3;
    for(let i=0;i<photos.length;i+=maxPerRow){
-     const row=photos.slice(i,i+maxPerRow),h=42;ensure(h+3);
+     const row=photos.slice(i,i+maxPerRow),h=44;
+     ensure(h+4);
      row.forEach((p,j)=>{
        const x=M+j*(box+gap);
-       try{doc.addImage(p,"JPEG",x,y,box,h-4,undefined,"FAST");doc.rect(x,y,box,h-4)}catch(e){}
+       try{
+         doc.addImage(p,"JPEG",x,y,box,h-5,undefined,"MEDIUM");
+         doc.rect(x,y,box,h-5);
+       }catch(e){
+         doc.setFont("helvetica","normal");doc.setFontSize(6);
+         doc.rect(x,y,box,h-5);
+         doc.text("FOTO NO DISPONIBLE",x+2,y+8);
+         console.error("Error insertando foto en PDF:",e);
+       }
      });
      y+=h;
    }
@@ -202,14 +212,9 @@ async function makePdf(){
    section(secNo+". "+sec.title);secNo++;
    const rows=sec.items.map((item,i)=>{
      const a=state.answers[si+"-"+i]||{};
-     return [i+1,item,a.status==="ok"?"OK":a.status==="bad"?"NO OK":"PENDIENTE",a.critical||""];
+     return [i+1,item,a.status==="ok"?"OK":a.status==="bad"?"NO OK":"PENDIENTE",a.critical||"",a.status==="bad"?(a.obs||""):""];
    });
-   table(["Nº","Punto de control","Resultado","Criticidad"],rows,[10,112,32,36]);
-   sec.items.forEach((item,i)=>{
-     const a=state.answers[si+"-"+i]||{};
-     if(a.status==="bad"&&a.obs) note("Observación "+(i+1)+": "+a.obs);
-     
-   });
+   table(["Nº","Punto de control","Resultado","Criticidad","Comentarios"],rows,[8,95,25,25,37]);
  });
 
  section("6. TEMPERATURAS");
