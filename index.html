@@ -20,6 +20,20 @@ canvas#signature{width:100%;height:220px;border:2px dashed #b9ccc5;border-radius
 <div class="field"><label>Planta</label><input value="Mercazaragoza" readonly></div><div class="field"><label>Responsable</label><select id="responsible"></select></div>
 </div></section>
 <div id="checklist"></div>
+<section class="card extra" id="returnSection">
+<div class="section-title">↩️ Zona devolución</div>
+<p class="notice">Selecciona dónde está la devolución. La foto es obligatoria.</p>
+<div class="chips">
+<button type="button" class="chip" data-return="C1">C1</button>
+<button type="button" class="chip" data-return="C4">C4</button>
+</div>
+<div class="grid2" style="margin-top:10px">
+<div class="field"><label>¿Hay producto?</label><select id="returnProduct"><option value="">Seleccionar…</option><option>Sí</option><option>No</option></select></div>
+<div class="field"><label>¿Está etiquetado?</label><select id="returnLabel"><option value="">Seleccionar…</option><option>Sí</option><option>No</option></select></div>
+</div>
+<div class="photo-row" style="margin-top:10px"><button type="button" class="photo-btn" id="returnPhotoBtn">📷 Foto obligatoria</button><span id="returnPhotoStatus" class="notice">Sin foto</span><input id="returnPhotoInput" type="file" accept="image/*" capture="environment" class="hidden"></div>
+<div id="returnThumb" class="thumbs" style="margin-top:8px"></div>
+</section>
 <section class="card extra" id="temperaturesSection">
 <div class="section-title">🌡️ Temperaturas cámaras</div>
 <div class="grid2">
@@ -92,7 +106,7 @@ const CHECK=[
 "No se encuentran productos químicos fuera, sin supervisión."
 ]}];
 const state={answers:{},photos:{},temps:{},returnLocations:[],returnPhoto:null};
-const APP_VERSION="2026-10-05-06";const $=x=>document.getElementById(x);
+const APP_VERSION="2026-10-05-07";const $=x=>document.getElementById(x);
 (function(){
   try{
     const isStandalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone;
@@ -129,7 +143,10 @@ function sigEnd(e){if(e)e.preventDefault();drawing=false}
 sigCanvas.addEventListener("touchstart",sigStart,{passive:false});sigCanvas.addEventListener("touchmove",sigMove,{passive:false});sigCanvas.addEventListener("touchend",sigEnd,{passive:false});sigCanvas.addEventListener("mousedown",sigStart);sigCanvas.addEventListener("mousemove",sigMove);sigCanvas.addEventListener("mouseup",sigEnd);sigCanvas.addEventListener("mouseleave",sigEnd);
 $("clearSignature").onclick=()=>sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height);
 
-$("finish").onclick=async()=>{let e=validate();if(e.length){alert("Revisa antes de enviar:\n\n• "+e.slice(0,8).join("\n• ")+(e.length>8?"\n• …":""));return}let doc=await makePdf(),blob=doc.output("blob"),file=new File([blob],"Informe_CheckIFS_Mercazaragoza.pdf",{type:"application/pdf"});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:"Informe CheckIFS Planta",text:"Informe de inspección IFS · Mercazaragoza",files:[file]})}else{doc.save(file.name);$("modal").classList.add("show")}};
+document.querySelectorAll("[data-return]").forEach(b=>b.onclick=()=>{let v=b.dataset.return;state.returnLocations=state.returnLocations.includes(v)?state.returnLocations.filter(x=>x!==v):[...state.returnLocations,v];b.classList.toggle("active",state.returnLocations.includes(v));update()});
+$("returnPhotoBtn").onclick=()=>$("returnPhotoInput").click();
+$("returnPhotoInput").onchange=async e=>{let f=e.target.files&&e.target.files[0];if(!f)return;state.returnPhoto=await resize(f);$("returnPhotoStatus").textContent="Foto añadida ✓";$("returnThumb").innerHTML='<img class="thumb" src="'+state.returnPhoto+'">';update()};
+$("finish").onclick=async()=>{let e=validate();if(e.length){alert("Revisa antes de generar el informe:\n\n• "+e.slice(0,10).join("\n• ")+(e.length>10?"\n• …":""));return}try{window.currentPdf=await makePdf();$("sendPanel").classList.remove("hidden");alert("Informe generado correctamente. Ahora puedes enviarlo por WhatsApp y después por correo.");}catch(err){alert("No se ha podido generar el informe. Comprueba que la página tiene conexión a Internet y vuelve a intentarlo.");console.error(err)}};
 async function shareCurrent(){let doc=window.currentPdf||await makePdf(),blob=doc.output("blob"),file=new File([blob],"Informe_CheckIFS_Mercazaragoza.pdf",{type:"application/pdf"});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({title:"Informe CheckIFS Planta",text:"Informe de inspección IFS · Mercazaragoza",files:[file]})}catch(e){}}else doc.save(file.name)}
 $("sendWhatsApp").onclick=shareCurrent;
 $("sendEmail").onclick=shareCurrent;
