@@ -56,10 +56,6 @@ canvas#signature{width:100%;height:220px;border:2px dashed #b9ccc5;border-radius
 <div class="subcheck"><b>Ganchos sin contar</b><div class="photo-row" style="margin-top:10px"><button type="button" class="photo-btn" id="hooksMissingPhotoBtn">📷 Foto obligatoria</button><span id="hooksMissingPhotoStatus" class="notice">Sin foto</span><input id="hooksMissingPhotoInput" type="file" accept="image/*" capture="environment" multiple class="hidden"></div><div id="hooksMissingPhotoThumb" class="thumbs" style="margin-top:8px"></div></div>
 </section>
 <section class="card extra">
-<div class="section-title">Revisión mensual de caducidades</div>
-<div class="grid2"><div class="field"><label>Revisado</label><select id="expiryReviewed"><option value="">Seleccionar…</option><option>Sí</option><option>No</option></select></div><div class="field"><label>Avisado cliente</label><select id="expiryClient"><option value="">Seleccionar…</option><option>Sí</option><option>No</option><option>No aplica</option></select></div></div>
-</section>
-<section class="card extra">
 <div class="section-title">Productos de mantenimiento y limpieza</div>
 <div class="grid2"><div class="field"><label>Cantidad CLORAJET</label><input id="clorajetQty" inputmode="decimal"></div><div class="field"><label>Cantidad MIDA-FOAM</label><input id="midaQty" inputmode="decimal"></div></div>
 <div class="grid2"><div class="field"><label>¿Hay producto preparado de MIDA-FOAM?</label><select id="midaPrepared"><option>No</option><option>Sí</option></select></div><div class="field"><label>¿Hay producto preparado de CLORAJET?</label><select id="clorajetPrepared"><option>No</option><option>Sí</option></select></div></div>
@@ -105,7 +101,7 @@ const CHECK=[
 "No se encuentran productos químicos fuera, sin supervisión."
 ]}];
 const state={answers:{},photos:{},temps:{},returnLocations:[],returnPhoto:null,returnC1Photo:[],returnC4Photo:[],hooksCountedPhoto:[],hooksMissingPhoto:[],adblueLevel:""};
-const APP_VERSION="2026-10-05-11";const $=x=>document.getElementById(x);
+const APP_VERSION="2026-10-05-12";const $=x=>document.getElementById(x);
 (function(){
   try{
     const isStandalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone;
@@ -129,7 +125,14 @@ function setAnswer(item,a){let k=item.dataset.key;state.answers[k]=state.answers
 function setCrit(item,c){let k=item.dataset.key;state.answers[k]=state.answers[k]||{};state.answers[k].critical=c;item.querySelectorAll("[data-crit]").forEach(x=>x.classList.toggle("active",x.dataset.crit===c));item.querySelector(".photo-required").classList.toggle("hidden",c!=="Media"&&c!=="Alta");update()}
 async function addPhotos(item,files){let k=item.dataset.key;state.photos[k]=state.photos[k]||[];for(const f of files){if(!f.type.startsWith("image/"))continue;state.photos[k].push(await resize(f))}renderThumbs(item);update()}
 function resize(file){return new Promise(ok=>{let r=new FileReader();r.onload=()=>{let im=new Image();im.onload=()=>{let max=1400,s=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);ok(c.toDataURL("image/jpeg",.78))};im.src=r.result};r.readAsDataURL(file)})}
-function renderThumbs(item){let k=item.dataset.key;item.querySelector("[data-thumbs]").innerHTML=(state.photos[k]||[]).map((p,i)=>'<img class="thumb" src="'+p+'" title="Foto '+(i+1)+'">').join("")}
+function renderThumbs(item){
+ let k=item.dataset.key,arr=state.photos[k]||[],box=item.querySelector("[data-thumbs]");
+ box.innerHTML=arr.map((p,i)=>'<div class="photo-item"><img class="thumb" src="'+p+'" title="Foto '+(i+1)+'"><button type="button" class="delete-photo" data-delete-incident="'+k+'" data-photo-index="'+i+'">🗑️ Borrar foto</button></div>').join("");
+ box.querySelectorAll("[data-delete-incident]").forEach(b=>b.onclick=()=>{
+   const key=b.dataset.deleteIncident,idx=Number(b.dataset.photoIndex);
+   state.photos[key].splice(idx,1);renderThumbs(item);update();
+ });
+}
 function update(){let entries=Object.entries(state.answers),ok=entries.filter(([k,x])=>x.status==="ok"),bad=entries.filter(([k,x])=>x.status==="bad");$("total").textContent=CHECK.reduce((a,s)=>a+s.items.length,0);$("ok").textContent=ok.length;$("bad").textContent=bad.length;$("incidents").innerHTML=bad.map(([k,x],i)=>'<div class="inc"><b>Incidencia '+(i+1)+'</b> · '+esc(x.critical||"Sin criticidad")+'<br>'+esc(x.obs||"Falta observación")+'<br>📷 '+((state.photos[k]||[]).length)+' foto(s)</div>').join("")}
 function validate(){let errors=[];if(!$("responsible").value)errors.push("Selecciona el responsable.");if(!$("returnC1Product").value)errors.push("Indica si hay producto en devolución C1.");if(!$("returnC1Label").value)errors.push("Indica si está etiquetado en devolución C1.");if(!state.returnC1Photo?.length)errors.push("Falta la foto obligatoria de devolución C1.");if(!$("returnC4Product").value)errors.push("Indica si hay producto en devolución C4 · Otros.");if(!$("returnC4Label").value)errors.push("Indica si está etiquetado en devolución C4 · Otros.");if(!state.returnC4Photo?.length)errors.push("Falta la foto obligatoria de devolución C4 · Otros.");CHECK.forEach((sec,si)=>sec.items.forEach((txt,i)=>{let a=state.answers[si+"-"+i];if(!a||!a.status)errors.push("Falta revisar: "+sec.title+" · "+txt);if(a?.status==="bad"){if(!a.obs?.trim())errors.push("Falta observación en: "+txt);if(!a.critical)errors.push("Falta criticidad en: "+txt);if((a.critical==="Media"||a.critical==="Alta")&&!(state.photos[si+"-"+i]||[]).length)errors.push("Falta foto obligatoria en: "+txt)} }));["C1","C2","C3","C4","C5"].forEach(c=>{let el=$(c==="C1"?"tC1":c==="C2"?"tC2":c==="C3"?"tC3":c==="C4"?"tC4":"tC5");if(!el||el.value==="")errors.push("Falta temperatura de "+c+".")});if(!state.hooksCountedPhoto?.length)errors.push("Falta la foto obligatoria de ganchos contados.");if(!state.hooksMissingPhoto?.length)errors.push("Falta la foto obligatoria de ganchos sin contar.");if(!state.adblueLevel)errors.push("Selecciona el nivel del tanque AdBlue.");return errors}
 async function makePdf(){
@@ -164,7 +167,7 @@ async function makePdf(){
  line("C5 · Nº palets no almacenaje: "+$("c5palets").value);
  line("C4/C5 · Cliente / observación: "+$("c45obs").value);
  line("Ganchos contados: "+(state.hooksCountedPhoto||[]).length+" foto(s)");for(const p of state.hooksCountedPhoto||[])await photo(p,"Foto · Ganchos contados");line("Ganchos sin contar: "+(state.hooksMissingPhoto||[]).length+" foto(s)");for(const p of state.hooksMissingPhoto||[])await photo(p,"Foto · Ganchos sin contar");
- line("Caducidades · Revisado: "+$("expiryReviewed").value+" · Avisado cliente: "+$("expiryClient").value);
+
  line("CLORAJET: "+$("clorajetQty").value+" · MIDA-FOAM: "+$("midaQty").value);
  line("MIDA-FOAM preparado: "+$("midaPrepared").value+" · CLORAJET preparado: "+$("clorajetPrepared").value);
  line("Tanque AdBlue: "+state.adblueLevel);
