@@ -50,9 +50,10 @@ canvas#signature{width:100%;height:220px;border:2px dashed #b9ccc5;border-radius
 </div>
 <div class="subcheck"><b>Toda mercancía en C4 y C5 que no sea de almacenaje deberá comunicarse a Tráfico, indicando palets y cliente.</b><div class="field"><label>Cliente / observación</label><input id="c45obs" placeholder="Cliente y/o detalle"></div></div>
 </section>
-<section class="card extra">
+<section class="card extra" id="hooksSection">
 <div class="section-title">Revisión de ganchos</div>
-<div class="grid2"><div class="field"><label>Ganchos contados</label><input id="hooksCounted" type="number" min="0" inputmode="numeric"></div><div class="field"><label>Ganchos sin contar</label><input id="hooksMissing" type="number" min="0" inputmode="numeric"></div></div>
+<div class="subcheck"><b>Ganchos contados</b><div class="photo-row" style="margin-top:10px"><button type="button" class="photo-btn" id="hooksCountedPhotoBtn">📷 Foto obligatoria</button><span id="hooksCountedPhotoStatus" class="notice">Sin foto</span><input id="hooksCountedPhotoInput" type="file" accept="image/*" capture="environment" class="hidden"></div><div id="hooksCountedPhotoThumb" class="thumbs" style="margin-top:8px"></div></div>
+<div class="subcheck"><b>Ganchos sin contar</b><div class="photo-row" style="margin-top:10px"><button type="button" class="photo-btn" id="hooksMissingPhotoBtn">📷 Foto obligatoria</button><span id="hooksMissingPhotoStatus" class="notice">Sin foto</span><input id="hooksMissingPhotoInput" type="file" accept="image/*" capture="environment" class="hidden"></div><div id="hooksMissingPhotoThumb" class="thumbs" style="margin-top:8px"></div></div>
 </section>
 <section class="card extra">
 <div class="section-title">Revisión mensual de caducidades</div>
@@ -63,7 +64,7 @@ canvas#signature{width:100%;height:220px;border:2px dashed #b9ccc5;border-radius
 <div class="grid2"><div class="field"><label>Cantidad CLORAJET</label><input id="clorajetQty" inputmode="decimal"></div><div class="field"><label>Cantidad MIDA-FOAM</label><input id="midaQty" inputmode="decimal"></div></div>
 <div class="grid2"><div class="field"><label>¿Hay producto preparado de MIDA-FOAM?</label><select id="midaPrepared"><option>No</option><option>Sí</option></select></div><div class="field"><label>¿Hay producto preparado de CLORAJET?</label><select id="clorajetPrepared"><option>No</option><option>Sí</option></select></div></div>
 </section>
-<section class="card extra"><div class="section-title">Revisión tanque AdBlue</div><div class="field"><label>Estado / observaciones</label><textarea id="adblue" class="obs" rows="2" placeholder="Indicar estado o incidencia"></textarea></div></section>
+<section class="card extra"><div class="section-title">Revisión tanque AdBlue</div><div class="field"><label>Nivel del tanque</label><div class="chips"><button type="button" class="chip" data-adblue="25%">25%</button><button type="button" class="chip" data-adblue="50%">50%</button><button type="button" class="chip" data-adblue="75%">75%</button><button type="button" class="chip" data-adblue="100%">100%</button></div></div></section>
 <section class="card extra" id="signatureSection"><div class="section-title">✍️ Firma del responsable</div><p class="notice">Firma con el dedo dentro del recuadro.</p><canvas id="signature" width="620" height="180"></canvas><button class="btn secondary" id="clearSignature" type="button" style="margin-top:8px">Borrar firma</button></section>
 <section class="card"><div class="section-title">Resumen</div><div class="stats"><div class="stat"><b id="total">0</b>Total</div><div class="stat"><b id="ok">0</b>Correctos</div><div class="stat"><b id="bad">0</b>Incidencias</div></div><div id="incidents"></div></section>
 <section class="card"><button class="btn primary" id="finish">📄 Generar informe</button><div id="sendPanel" class="hidden send-panel"><div class="section-title">Enviar informe</div><p class="notice">El informe se genera una sola vez. Puedes enviarlo por WhatsApp y por correo, en dos pasos independientes.</p><button class="btn whatsapp" id="sendWhatsApp" type="button">1️⃣ WhatsApp</button><button class="btn mail" id="sendEmail" type="button">2️⃣ Correo</button><button class="btn secondary" id="newInspection" type="button">Nueva inspección</button></div><p class="notice">La inspección no se guarda como histórico. Las fotografías y la firma permanecen solo en esta sesión hasta finalizarla.</p></section>
@@ -103,8 +104,8 @@ const CHECK=[
 "Se encuentra en correcto estado: no se observan objetos o material desperdigado ni restos de suciedad tanto en el interior como en el exterior del muelle.",
 "No se encuentran productos químicos fuera, sin supervisión."
 ]}];
-const state={answers:{},photos:{},temps:{},returnLocations:[],returnPhoto:null,returnC1Photo:null,returnC4Photo:null};
-const APP_VERSION="2026-10-05-09";const $=x=>document.getElementById(x);
+const state={answers:{},photos:{},temps:{},returnLocations:[],returnPhoto:null,returnC1Photo:null,returnC4Photo:null,hooksCountedPhoto:null,hooksMissingPhoto:null,adblueLevel:""};
+const APP_VERSION="2026-10-05-10";const $=x=>document.getElementById(x);
 (function(){
   try{
     const isStandalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone;
@@ -130,7 +131,7 @@ async function addPhotos(item,files){let k=item.dataset.key;state.photos[k]=stat
 function resize(file){return new Promise(ok=>{let r=new FileReader();r.onload=()=>{let im=new Image();im.onload=()=>{let max=1400,s=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);ok(c.toDataURL("image/jpeg",.78))};im.src=r.result};r.readAsDataURL(file)})}
 function renderThumbs(item){let k=item.dataset.key;item.querySelector("[data-thumbs]").innerHTML=(state.photos[k]||[]).map((p,i)=>'<img class="thumb" src="'+p+'" title="Foto '+(i+1)+'">').join("")}
 function update(){let entries=Object.entries(state.answers),ok=entries.filter(([k,x])=>x.status==="ok"),bad=entries.filter(([k,x])=>x.status==="bad");$("total").textContent=CHECK.reduce((a,s)=>a+s.items.length,0);$("ok").textContent=ok.length;$("bad").textContent=bad.length;$("incidents").innerHTML=bad.map(([k,x],i)=>'<div class="inc"><b>Incidencia '+(i+1)+'</b> · '+esc(x.critical||"Sin criticidad")+'<br>'+esc(x.obs||"Falta observación")+'<br>📷 '+((state.photos[k]||[]).length)+' foto(s)</div>').join("")}
-function validate(){let errors=[];if(!$("responsible").value)errors.push("Selecciona el responsable.");if(!$("returnC1Product").value)errors.push("Indica si hay producto en devolución C1.");if(!$("returnC1Label").value)errors.push("Indica si está etiquetado en devolución C1.");if(!state.returnC1Photo)errors.push("Falta la foto obligatoria de devolución C1.");if(!$("returnC4Product").value)errors.push("Indica si hay producto en devolución C4 · Otros.");if(!$("returnC4Label").value)errors.push("Indica si está etiquetado en devolución C4 · Otros.");if(!state.returnC4Photo)errors.push("Falta la foto obligatoria de devolución C4 · Otros.");CHECK.forEach((sec,si)=>sec.items.forEach((txt,i)=>{let a=state.answers[si+"-"+i];if(!a||!a.status)errors.push("Falta revisar: "+sec.title+" · "+txt);if(a?.status==="bad"){if(!a.obs?.trim())errors.push("Falta observación en: "+txt);if(!a.critical)errors.push("Falta criticidad en: "+txt);if((a.critical==="Media"||a.critical==="Alta")&&!(state.photos[si+"-"+i]||[]).length)errors.push("Falta foto obligatoria en: "+txt)} }));["C1","C2","C3","C4","C5"].forEach(c=>{let el=$(c==="C1"?"tC1":c==="C2"?"tC2":c==="C3"?"tC3":c==="C4"?"tC4":"tC5");if(!el||el.value==="")errors.push("Falta temperatura de "+c+".")});if(!$("hooksCounted").value&&!$("hooksMissing").value)errors.push("Completa la revisión de ganchos.");return errors}
+function validate(){let errors=[];if(!$("responsible").value)errors.push("Selecciona el responsable.");if(!$("returnC1Product").value)errors.push("Indica si hay producto en devolución C1.");if(!$("returnC1Label").value)errors.push("Indica si está etiquetado en devolución C1.");if(!state.returnC1Photo)errors.push("Falta la foto obligatoria de devolución C1.");if(!$("returnC4Product").value)errors.push("Indica si hay producto en devolución C4 · Otros.");if(!$("returnC4Label").value)errors.push("Indica si está etiquetado en devolución C4 · Otros.");if(!state.returnC4Photo)errors.push("Falta la foto obligatoria de devolución C4 · Otros.");CHECK.forEach((sec,si)=>sec.items.forEach((txt,i)=>{let a=state.answers[si+"-"+i];if(!a||!a.status)errors.push("Falta revisar: "+sec.title+" · "+txt);if(a?.status==="bad"){if(!a.obs?.trim())errors.push("Falta observación en: "+txt);if(!a.critical)errors.push("Falta criticidad en: "+txt);if((a.critical==="Media"||a.critical==="Alta")&&!(state.photos[si+"-"+i]||[]).length)errors.push("Falta foto obligatoria en: "+txt)} }));["C1","C2","C3","C4","C5"].forEach(c=>{let el=$(c==="C1"?"tC1":c==="C2"?"tC2":c==="C3"?"tC3":c==="C4"?"tC4":"tC5");if(!el||el.value==="")errors.push("Falta temperatura de "+c+".")});if(!state.hooksCountedPhoto)errors.push("Falta la foto obligatoria de ganchos contados.");if(!state.hooksMissingPhoto)errors.push("Falta la foto obligatoria de ganchos sin contar.");if(!state.adblueLevel)errors.push("Selecciona el nivel del tanque AdBlue.");return errors}
 async function makePdf(){
  const {jsPDF}=window.jspdf; const doc=new jsPDF(); let y=18;
  const margin=16, bottom=270, pageW=178;
@@ -162,11 +163,11 @@ async function makePdf(){
  line("C4 · Nº palets no almacenaje: "+$("c4palets").value);
  line("C5 · Nº palets no almacenaje: "+$("c5palets").value);
  line("C4/C5 · Cliente / observación: "+$("c45obs").value);
- line("Ganchos contados: "+$("hooksCounted").value+" · Sin contar: "+$("hooksMissing").value);
+ line("Ganchos contados: foto obligatoria");await photo(state.hooksCountedPhoto,"Foto · Ganchos contados");line("Ganchos sin contar: foto obligatoria");await photo(state.hooksMissingPhoto,"Foto · Ganchos sin contar");
  line("Caducidades · Revisado: "+$("expiryReviewed").value+" · Avisado cliente: "+$("expiryClient").value);
  line("CLORAJET: "+$("clorajetQty").value+" · MIDA-FOAM: "+$("midaQty").value);
  line("MIDA-FOAM preparado: "+$("midaPrepared").value+" · CLORAJET preparado: "+$("clorajetPrepared").value);
- line("Tanque AdBlue: "+$("adblue").value);
+ line("Tanque AdBlue: "+state.adblueLevel);
  section("9. FIRMA DEL RESPONSABLE");
  const sig=$("signature");try{const img=sig.toDataURL("image/png");if(y+45>bottom){doc.addPage();y=18}doc.addImage(img,"PNG",margin,y,120,35);y+=41}catch(err){line("Firma no disponible.")}
  const pages=doc.getNumberOfPages();for(let p=1;p<=pages;p++){doc.setPage(p);doc.setFont("helvetica","normal");doc.setFontSize(8);doc.text("CheckIFS Planta · Mercazaragoza",margin,287);doc.text("Página "+p+" de "+pages,178,287,{align:"right"})}
@@ -184,6 +185,10 @@ $("clearSignature").onclick=()=>sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.h
 async function setReturnPhoto(input,stateKey,statusId,thumbId){let f=input.files&&input.files[0];if(!f)return;state[stateKey]=await resize(f);$(statusId).textContent="Foto añadida ✓";$(thumbId).innerHTML='<img class="thumb" src="'+state[stateKey]+'">';update()}
 $("returnC1PhotoBtn").onclick=()=>$("returnC1PhotoInput").click();$("returnC1PhotoInput").onchange=()=>setReturnPhoto($("returnC1PhotoInput"),"returnC1Photo","returnC1PhotoStatus","returnC1Thumb");
 $("returnC4PhotoBtn").onclick=()=>$("returnC4PhotoInput").click();$("returnC4PhotoInput").onchange=()=>setReturnPhoto($("returnC4PhotoInput"),"returnC4Photo","returnC4PhotoStatus","returnC4Thumb");
+function setupPhoto(btnId,inputId,stateKey,statusId,thumbId){$(btnId).onclick=()=>$(inputId).click();$(inputId).onchange=()=>setReturnPhoto($(inputId),stateKey,statusId,thumbId)}
+setupPhoto("hooksCountedPhotoBtn","hooksCountedPhotoInput","hooksCountedPhoto","hooksCountedPhotoStatus","hooksCountedPhotoThumb");
+setupPhoto("hooksMissingPhotoBtn","hooksMissingPhotoInput","hooksMissingPhoto","hooksMissingPhotoStatus","hooksMissingPhotoThumb");
+document.querySelectorAll("[data-adblue]").forEach(b=>b.onclick=()=>{state.adblueLevel=b.dataset.adblue;document.querySelectorAll("[data-adblue]").forEach(x=>x.classList.toggle("active",x===b));update()});
 $("finish").onclick=async()=>{let e=validate();if(e.length){alert("Revisa antes de generar el informe:\n\n• "+e.slice(0,10).join("\n• ")+(e.length>10?"\n• …":""));return}try{window.currentPdf=await makePdf();$("sendPanel").classList.remove("hidden");alert("Informe generado correctamente. Ahora puedes enviarlo por WhatsApp y después por correo.");}catch(err){alert("No se ha podido generar el informe. Comprueba que la página tiene conexión a Internet y vuelve a intentarlo.");console.error(err)}};
 async function shareCurrent(){let doc=window.currentPdf||await makePdf(),blob=doc.output("blob"),file=new File([blob],"Informe_CheckIFS_Mercazaragoza.pdf",{type:"application/pdf"});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({title:"Informe CheckIFS Planta",text:"Informe de inspección IFS · Mercazaragoza",files:[file]})}catch(e){}}else doc.save(file.name)}
 $("sendWhatsApp").onclick=shareCurrent;
