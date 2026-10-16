@@ -15,14 +15,14 @@ canvas#signature{width:100%;height:220px;border:2px dashed #b9ccc5;border-radius
 <body>
 <header><h1>CHECK IFS PLANTA</h1><div class="sub">Mercazaragoza · Inspección de planta · v2026-10-16-33</div></header>
 <main class="wrap"><button class="btn secondary" id="newInspection" type="button">Nueva inspección</button>
-<section class="card"><div class="section-title">Datos de la inspección</div><div class="meta">
+<section class="card"><div class="section-title">1. Datos de la inspección</div><div class="meta">
 <div class="field"><label>Fecha</label><input id="date" type="date" required></div><div class="field"><label>Hora</label><input id="time" type="time" required></div>
 <div class="field"><label>Planta</label><input value="Mercazaragoza" readonly></div><div class="field"><label>Responsable</label><select id="responsible"></select></div>
 </div></section>
 <div id="checklist"></div>
-<section class="card extra" id="auxiliaryPhotosSection"><div class="section-title">📷 Fotos adicionales · Zona de material auxiliar</div><div class="grid2"><div class="subcheck"><b>Almacén auxiliar</b><div class="photo-row" style="margin-top:8px"><button type="button" class="photo-btn" id="auxStorePhotoBtn">📷 Añadir foto</button><span id="auxStorePhotoStatus" class="notice">Sin foto</span><input id="auxStorePhotoInput" type="file" accept="image/*" capture="environment" multiple class="hidden"></div><div id="auxStorePhotoThumb" class="thumbs" style="margin-top:8px"></div></div><div class="subcheck"><b>Zona Máquina Limpiadora + Herramientas</b><div class="photo-row" style="margin-top:8px"><button type="button" class="photo-btn" id="cleanerToolsPhotoBtn">📷 Añadir foto</button><span id="cleanerToolsPhotoStatus" class="notice">Sin foto</span><input id="cleanerToolsPhotoInput" type="file" accept="image/*" capture="environment" multiple class="hidden"></div><div id="cleanerToolsPhotoThumb" class="thumbs" style="margin-top:8px"></div></div></div></section>
+<section class="card extra" id="auxiliaryPhotosSection"><div class="section-title">3. Fotos adicionales · Zona de material auxiliar</div><div class="grid2"><div class="subcheck"><b>Almacén auxiliar</b><div class="photo-row" style="margin-top:8px"><button type="button" class="photo-btn" id="auxStorePhotoBtn">📷 Añadir foto</button><span id="auxStorePhotoStatus" class="notice">Sin foto</span><input id="auxStorePhotoInput" type="file" accept="image/*" capture="environment" multiple class="hidden"></div><div id="auxStorePhotoThumb" class="thumbs" style="margin-top:8px"></div></div><div class="subcheck"><b>Zona Máquina Limpiadora + Herramientas</b><div class="photo-row" style="margin-top:8px"><button type="button" class="photo-btn" id="cleanerToolsPhotoBtn">📷 Añadir foto</button><span id="cleanerToolsPhotoStatus" class="notice">Sin foto</span><input id="cleanerToolsPhotoInput" type="file" accept="image/*" capture="environment" multiple class="hidden"></div><div id="cleanerToolsPhotoThumb" class="thumbs" style="margin-top:8px"></div></div></div></section>
 <section class="card extra" id="temperaturesSection">
-<div class="section-title">🌡️ Temperaturas cámaras</div>
+<div class="section-title">6. Temperaturas cámaras</div>
 <div class="grid2">
 <div class="field"><label>C1 · Temperatura</label><div class="temp-input"><span>−</span><input id="tC1" type="number" min="0" step="0.1" inputmode="decimal" placeholder="0"></div></div>
 <div class="field"><label>C2 · Temperatura</label><div class="temp-input"><span>−</span><input id="tC2" type="number" min="0" step="0.1" inputmode="decimal" placeholder="0"></div></div>
@@ -32,7 +32,7 @@ canvas#signature{width:100%;height:220px;border:2px dashed #b9ccc5;border-radius
 </div>
 </section>
 <section class="card extra" id="returnSection">
-<div class="section-title">↩️ Zona devolución</div>
+<div class="section-title">7. Zona devolución</div>
 <p class="notice">Las dos zonas deben rellenarse obligatoriamente.</p>
 <div class="subcheck"><b>C1</b>
 <div class="return-fields"><div class="field"><label>¿Hay producto?</label><select id="returnC1Product"><option value="">Seleccionar…</option><option>Sí</option><option>No</option></select></div><div class="field"><label>¿Está etiquetado?</label><select id="returnC1Label"><option value="">Seleccionar…</option><option>Sí</option><option>No</option></select></div><div class="field"><label>OBSERVACIONES</label><input id="returnC1Obs" placeholder="Observaciones"></div></div>
@@ -45,7 +45,7 @@ canvas#signature{width:100%;height:220px;border:2px dashed #b9ccc5;border-radius
 </section>
 
 <section class="card extra">
-<div class="section-title">Mercancía fresca/corta duración en tránsito</div>
+<div class="section-title">8. Mercancía fresca/corta duración en tránsito</div>
 <div class="grid2">
 <div class="field"><label>C4 · Nº palets (no almacenaje)</label><input id="c4palets" type="number" min="0" inputmode="numeric" placeholder="0"></div>
 <div class="field"><label>C5 · Nº palets (no almacenaje)</label><input id="c5palets" type="number" min="0" inputmode="numeric" placeholder="0"></div>
@@ -59,16 +59,16 @@ canvas#signature{width:100%;height:220px;border:2px dashed #b9ccc5;border-radius
 <div class="subcheck"><b>Toda mercancía en C4 y C5 que no sea de almacenaje deberá comunicarse a Tráfico, indicando palets y cliente.</b></div>
 </section>
 <section class="card extra" id="hooksSection">
-<div class="section-title">Revisión de ganchos</div>
+<div class="section-title">9. Revisión de ganchos</div>
 <div class="subcheck"><b>Ganchos contados</b><div class="photo-row" style="margin-top:10px"><button type="button" class="photo-btn" id="hooksCountedPhotoBtn">📷 Foto obligatoria</button><span id="hooksCountedPhotoStatus" class="notice">Sin foto</span><input id="hooksCountedPhotoInput" type="file" accept="image/*" capture="environment" multiple class="hidden"></div><div id="hooksCountedPhotoThumb" class="thumbs" style="margin-top:8px"></div></div>
 <div class="subcheck"><b>Ganchos sin contar</b><div class="photo-row" style="margin-top:10px"><button type="button" class="photo-btn" id="hooksMissingPhotoBtn">📷 Foto obligatoria</button><span id="hooksMissingPhotoStatus" class="notice">Sin foto</span><input id="hooksMissingPhotoInput" type="file" accept="image/*" capture="environment" multiple class="hidden"></div><div id="hooksMissingPhotoThumb" class="thumbs" style="margin-top:8px"></div></div>
 </section>
 <section class="card extra">
-<div class="section-title">Productos de mantenimiento y limpieza</div>
+<div class="section-title">10. Productos de mantenimiento y limpieza</div>
 <div class="grid2"><div class="field"><label>Cantidad botes CLORAJET</label><input id="clorajetQty" inputmode="decimal"></div><div class="field"><label>Cantidad botes MIDA-FOAM</label><input id="midaQty" inputmode="decimal"></div></div>
 <div class="grid2"><div class="field"><label>Diluciones preparadas · MIDA-FOAM</label><select id="midaPrepared"><option>No</option><option>Sí</option></select></div><div class="field"><label>Diluciones preparadas · CLORAJET</label><select id="clorajetPrepared"><option>No</option><option>Sí</option></select></div></div><div class="field" style="margin-top:10px"><label>Observaciones</label><textarea id="maintenanceObs" class="obs" rows="2" placeholder="Observaciones de mantenimiento y limpieza"></textarea></div><div class="subcheck" style="margin-top:10px"><b>Fotografía obligatoria de productos de mantenimiento y limpieza</b><div class="photo-row" style="margin-top:8px"><button type="button" class="photo-btn" id="maintenancePhotoBtn">📷 Foto obligatoria</button><span id="maintenancePhotoStatus" class="notice">Sin foto</span><input id="maintenancePhotoInput" type="file" accept="image/*" capture="environment" multiple class="hidden"></div><div id="maintenancePhotoThumb" class="thumbs" style="margin-top:8px"></div></div>
 </section>
-<section class="card extra"><div class="section-title">Revisión tanque AdBlue</div><div class="field"><label>Nivel del tanque</label><div class="chips"><button type="button" class="chip" data-adblue="25 L">25 L</button><button type="button" class="chip" data-adblue="50 L">50 L</button><button type="button" class="chip" data-adblue="75 L">75 L</button><button type="button" class="chip" data-adblue="100 L">100 L</button><button type="button" class="chip" data-adblue="125 L">125 L</button><button type="button" class="chip" data-adblue="150 L">150 L</button></div></div></section>
+<section class="card extra"><div class="section-title">11. Revisión tanque AdBlue</div><div class="field"><label>Nivel del tanque</label><div class="chips"><button type="button" class="chip" data-adblue="25 L">25 L</button><button type="button" class="chip" data-adblue="50 L">50 L</button><button type="button" class="chip" data-adblue="75 L">75 L</button><button type="button" class="chip" data-adblue="100 L">100 L</button><button type="button" class="chip" data-adblue="125 L">125 L</button><button type="button" class="chip" data-adblue="150 L">150 L</button></div></div></section>
 <section class="card extra" id="signatureSection"><div class="section-title">✍️ Firma del responsable</div><p class="notice">Firma con el dedo dentro del recuadro.</p><canvas id="signature" width="620" height="180"></canvas><button class="btn secondary" id="clearSignature" type="button" style="margin-top:8px">Borrar firma</button></section>
 <section class="card"><div class="section-title">Resumen</div><div class="stats"><div class="stat"><b id="total">0</b>Total</div><div class="stat"><b id="ok">0</b>Correctos</div><div class="stat"><b id="bad">0</b>Incidencias</div></div><div id="incidents"></div></section>
 <section class="card"><button class="btn primary" id="finish">📄 Generar informe</button><div class="grid2" style="margin-top:8px"><button class="btn secondary" id="finishTraffic" type="button">🚚 Informe Tráfico</button><button class="btn secondary" id="finishWarehouse" type="button">🏭 Informe Almacén</button></div><div id="pdfPreviewPanel" class="hidden send-panel"><div class="section-title">👁️ Previsualización del informe</div><div style="border:1px solid #cbdad5;border-radius:12px;overflow:hidden;background:#eef3f1"><iframe id="pdfPreview" title="Previsualización PDF" style="display:block;width:100%;height:520px;border:0;background:#fff"></iframe></div><button class="btn secondary" id="openPdf" type="button" style="margin-top:8px">🔎 Abrir PDF a pantalla completa</button></div><div id="sendPanel" class="hidden send-panel"><div class="section-title">Enviar informe</div><p class="notice">El informe se genera una sola vez. Puedes enviarlo por WhatsApp y por correo, en dos pasos independientes.</p><button class="btn whatsapp" id="sendWhatsApp" type="button">1️⃣ WhatsApp</button><button class="btn mail" id="sendEmail" type="button">2️⃣ Correo</button></div><p class="notice">La inspección no se guarda como histórico. Las fotografías y la firma permanecen solo en esta sesión hasta finalizarla.</p></section>
@@ -178,7 +178,31 @@ function renderThumbs(item){
  });
 }
 function update(){let entries=Object.entries(state.answers),ok=entries.filter(([k,x])=>x.status==="ok"),bad=entries.filter(([k,x])=>x.status==="bad");$("total").textContent=CHECK.reduce((a,s)=>a+s.items.length,0);$("ok").textContent=ok.length;$("bad").textContent=bad.length;$("incidents").innerHTML=bad.map(([k,x],i)=>'<div class="inc"><b>Incidencia '+(i+1)+'</b> · '+esc(x.critical||"Sin criticidad")+'<br>'+esc(x.obs||"Falta observación")+'<br>📷 '+((state.photos[k]||[]).length)+' foto(s)</div>').join("")}
-function validate(){let errors=[];if(!$("responsible").value)errors.push("Selecciona el responsable.");if(!$("returnC1Product").value)errors.push("Indica si hay producto en devolución C1.");if(!$("returnC1Label").value)errors.push("Indica si está etiquetado en devolución C1.");if(!state.returnC1Photo?.length)errors.push("Falta la foto obligatoria de devolución C1.");if(!$("returnC4Product").value)errors.push("Indica si hay producto en devolución C4.");if(!$("returnC4Label").value)errors.push("Indica si está etiquetado en devolución C4.");if(!state.returnC4Photo?.length)errors.push("Falta la foto obligatoria de devolución C4.");if(!state.maintenancePhoto?.length)errors.push("Falta la foto obligatoria del punto 10: Productos de mantenimiento y limpieza.");CHECK.forEach((sec,si)=>sec.items.forEach((txt,i)=>{let a=state.answers[si+"-"+i];if(!a||!a.status)errors.push("Falta revisar: "+sec.title+" · "+txt);if(a?.status==="bad"){if(!a.obs?.trim())errors.push("Falta observación en: "+txt);if(!a.critical)errors.push("Falta criticidad en: "+txt);if((a.critical==="Media"||a.critical==="Alta")&&!(state.photos[si+"-"+i]||[]).length)errors.push("Falta foto obligatoria en: "+txt)} }));["C1","C2","C3","C4","C5"].forEach(c=>{let el=$(c==="C1"?"tC1":c==="C2"?"tC2":c==="C3"?"tC3":c==="C4"?"tC4":"tC5");if(!el||el.value==="")errors.push("Falta temperatura de "+c+".")});if(!state.hooksCountedPhoto?.length)errors.push("Falta la foto obligatoria de ganchos contados.");if(!state.hooksMissingPhoto?.length)errors.push("Falta la foto obligatoria de ganchos sin contar.");if(!state.adblueLevel)errors.push("Selecciona el nivel del tanque AdBlue.");return errors}
+function validate(){
+ let errors=[];
+ if(!$("responsible").value)errors.push("Apartado 1. Datos de la inspección: selecciona el responsable.");
+ if(!$("returnC1Product").value)errors.push("Apartado 7. Zona devolución · C1: indica si hay producto.");
+ if(!$("returnC1Label").value)errors.push("Apartado 7. Zona devolución · C1: indica si está etiquetado.");
+ if(!state.returnC1Photo?.length)errors.push("Apartado 7. Zona devolución · C1: falta la foto obligatoria.");
+ if(!$("returnC4Product").value)errors.push("Apartado 7. Zona devolución · C4: indica si hay producto.");
+ if(!$("returnC4Label").value)errors.push("Apartado 7. Zona devolución · C4: indica si está etiquetado.");
+ if(!state.returnC4Photo?.length)errors.push("Apartado 7. Zona devolución · C4: falta la foto obligatoria.");
+ if(!state.maintenancePhoto?.length)errors.push("Apartado 10. Productos de mantenimiento y limpieza: falta la foto obligatoria.");
+ CHECK.forEach((sec,si)=>sec.items.forEach((txt,i)=>{
+   const no=si+3, a=state.answers[si+"-"+i], point=i+1;
+   if(!a||!a.status)errors.push("Apartado "+no+". "+sec.title+" · Punto "+point+": falta revisar.");
+   if(a?.status==="bad"){
+     if(!a.obs?.trim())errors.push("Apartado "+no+". "+sec.title+" · Punto "+point+": falta observación.");
+     if(!a.critical)errors.push("Apartado "+no+". "+sec.title+" · Punto "+point+": falta indicar criticidad.");
+     if((a.critical==="Media"||a.critical==="Alta")&&!(state.photos[si+"-"+i]||[]).length)errors.push("Apartado "+no+". "+sec.title+" · Punto "+point+": falta la foto obligatoria por criticidad "+a.critical+".");
+   }
+ }));
+ ["C1","C2","C3","C4","C5"].forEach(c=>{const el=$(c==="C1"?"tC1":c==="C2"?"tC2":c==="C3"?"tC3":c==="C4"?"tC4":"tC5");if(!el||el.value==="")errors.push("Apartado 6. Temperaturas cámaras: falta la temperatura de "+c+".")});
+ if(!state.hooksCountedPhoto?.length)errors.push("Apartado 9. Revisión de ganchos · Ganchos contados: falta la foto obligatoria.");
+ if(!state.hooksMissingPhoto?.length)errors.push("Apartado 9. Revisión de ganchos · Ganchos sin contar: falta la foto obligatoria.");
+ if(!state.adblueLevel)errors.push("Apartado 11. Revisión tanque AdBlue: selecciona el nivel del tanque.");
+ return errors;
+}
 async function makeSpecialPdf(kind){
  const {jsPDF}=window.jspdf;const doc=new jsPDF({orientation:"p",unit:"mm",format:"a4"});
  const M=10,W=190;let y=15;const text=v=>String(v==null||v===""?"—":v);
