@@ -343,8 +343,8 @@ async function makePdf(){
  photoGrid("10. Productos de mantenimiento y limpieza",state.maintenancePhoto);
  photoGrid("Zona de material auxiliar · Almacén auxiliar",state.auxStorePhoto);
  photoGrid("Zona de material auxiliar · Zona Máquina Limpiadora + Herramientas",state.cleanerToolsPhoto);
- photoGrid("9. Revisión de ganchos · Ganchos contados",state.hooksCountedPhoto);
- photoGrid("9. Revisión de ganchos · Ganchos sin contar",state.hooksMissingPhoto);photoGrid("8. Mercancía fresca/corta duración en tránsito · C4",state.c4Photo);photoGrid("8. Mercancía fresca/corta duración en tránsito · C5",state.c5Photo);
+ photoGrid("9. Revisión de ganchos · Ganchos contados · Foto de comprobación de ganchos contados",state.hooksCountedPhoto);
+ photoGrid("9. Revisión de ganchos · Ganchos sin contar · Foto de ganchos pendientes de contar",state.hooksMissingPhoto);photoGrid("8. Mercancía fresca/corta duración en tránsito · C4",state.c4Photo);photoGrid("8. Mercancía fresca/corta duración en tránsito · C5",state.c5Photo);
  CHECK.forEach((sec,si)=>{
    sec.items.forEach((item,i)=>{
      const photos=state.photos[si+"-"+i]||[];
