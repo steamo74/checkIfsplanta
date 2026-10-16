@@ -302,10 +302,10 @@ async function makePdf(){
  ],[40,55,40,55]);
 
  section("7. ZONA DEVOLUCIÓN");
- table(["Zona","Producto","Etiquetado","Fotos"],[
-   ["C1",$("returnC1Product").value,$("returnC1Label").value,(state.returnC1Photo||[]).length+" foto(s)"],
-   ["C4",$("returnC4Product").value,$("returnC4Label").value,(state.returnC4Photo||[]).length+" foto(s)"]
- ],[45,48,48,49]);
+ table(["Zona","Producto","Etiquetado","Observaciones","Fotos"],[
+   ["C1",$("returnC1Product").value,$("returnC1Label").value,$("returnC1Obs").value,(state.returnC1Photo||[]).length+" foto(s)"],
+   ["C4",$("returnC4Product").value,$("returnC4Label").value,$("returnC4Obs").value,(state.returnC4Photo||[]).length+" foto(s)"]
+ ],[25,32,32,65,36]);
  
 
  section("8. MERCANCÍA FRESCA/CORTA DURACIÓN EN TRÁNSITO");
