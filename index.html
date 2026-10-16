@@ -375,7 +375,7 @@ async function addPhotoSet(input,stateKey,statusId,thumbId){
  for(const f of files)state[stateKey].push(await resize(f));
  input.value="";
  renderPhotoSet(stateKey,statusId,thumbId);
- update()
+ queueDraftSave();update()
 }
 function renderPhotoSet(stateKey,statusId,thumbId){
  const arr=state[stateKey]||[];
